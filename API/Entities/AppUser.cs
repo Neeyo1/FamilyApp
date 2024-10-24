@@ -16,4 +16,10 @@ public class AppUser : IdentityUser<int>
 
     //AppUser - Group (Owner)
     public ICollection<Group> OwnerOf { get; set; } = [];
+
+    //User - Assignment(Members)
+    public ICollection<UserAssignment> UserAssignments { get; set; } = [];
+
+    //User - Assignment(Creator)
+    public ICollection<Assignment> AssignmentsCreated { get; set; } = [];
 }

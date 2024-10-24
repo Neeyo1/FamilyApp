@@ -12,6 +12,7 @@ public class DataContext(DbContextOptions options) : IdentityDbContext<AppUser, 
     public DbSet<Group> Groups { get; set; }
     public DbSet<UserGroup> UserGroups { get; set; }
     public DbSet<Assignment> Assignments { get; set; }
+    public DbSet<UserAssignment> UserAssignments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -57,6 +58,28 @@ public class DataContext(DbContextOptions options) : IdentityDbContext<AppUser, 
             .HasMany(x => x.Assignments)
             .WithOne(x => x.Group)
             .HasForeignKey(x => x.GroupId)
+            .IsRequired();
+
+        //AppUser - Assignment(Members)
+        builder.Entity<UserAssignment>().HasKey(x => new {x.UserId, x.AssignmentId});
+
+        builder.Entity<AppUser>()
+            .HasMany(x => x.UserAssignments)
+            .WithOne(x => x.User)
+            .HasForeignKey(x => x.UserId)
+            .IsRequired();
+
+        builder.Entity<Assignment>()
+            .HasMany(x => x.UserAssignments)
+            .WithOne(x => x.Assignment)
+            .HasForeignKey(x => x.AssignmentId)
+            .IsRequired();
+
+        //AppUser - Assignment(Creator)
+        builder.Entity<AppUser>()
+            .HasMany(x => x.AssignmentsCreated)
+            .WithOne(x => x.CreatedBy)
+            .HasForeignKey(x => x.CreatedById)
             .IsRequired();
     }
 }

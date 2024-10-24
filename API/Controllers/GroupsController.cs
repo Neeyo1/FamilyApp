@@ -49,6 +49,9 @@ public class GroupsController(IGroupRepository groupRepository, IUserRepository 
     [HttpPost]
     public async Task<ActionResult<GroupDto>> CreateGroup(GroupCreateDto groupCreateDto)
     {
+        var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return BadRequest("Could not find user");
+        
         var owner = await userRepository.GetUserByUsernameAsync(groupCreateDto.Owner.ToLower());
         if (owner == null) return BadRequest("Could not find user");
 

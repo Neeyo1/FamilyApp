@@ -13,7 +13,14 @@ public class Assignment
     public bool Completed { get; set; } = false;
     public int MaxUsers { get; set; } = 1;
 
+    //Assigment - User(creator)
+    public int CreatedById { get; set; }
+    public AppUser CreatedBy { get; set; } = null!;
+
     //Assigment - Group
     public int GroupId { get; set; }
     public Group Group { get; set; } = null!;
+
+    //Assignment - User
+    public ICollection<UserAssignment> UserAssignments { get; set; } = [];
 }

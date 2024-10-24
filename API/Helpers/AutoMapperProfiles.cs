@@ -15,6 +15,10 @@ public class AutoMapperProfiles : Profile
         CreateMap<UserGroup, MemberDto>()
             .ForMember(x => x.Id, y => y.MapFrom(z => z.UserId))
             .ForMember(x => x.KnownAs, y => y.MapFrom(z => z.User.KnownAs));
+        CreateMap<Assignment, AssignmentDto>();
+        CreateMap<UserAssignment, AssignedMemberDto>()
+            .ForMember(x => x.Id, y => y.MapFrom(z => z.UserId))
+            .ForMember(x => x.KnownAs, y => y.MapFrom(z => z.User.KnownAs));
 
         CreateMap<DateTime, DateTime>().ConvertUsing(x => DateTime.SpecifyKind(x, DateTimeKind.Utc));
         CreateMap<DateTime?, DateTime?>().ConvertUsing(x => x.HasValue 
