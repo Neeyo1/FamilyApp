@@ -1,5 +1,6 @@
 using API.DTOs;
 using API.Entities;
+using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -32,13 +33,36 @@ public class GroupRepository(DataContext context, IMapper mapper) : IGroupReposi
             .SingleOrDefaultAsync(x => x.GroupName == groupName);
     }
 
-    public async Task<IEnumerable<GroupDto>> GetMyGroupsAsync(int userId)
+    public async Task<PagedList<GroupDto>> GetMyGroupsAsync(int userId, GroupParams groupParams)
     {  
-        return await context.UserGroups
+        var query = context.UserGroups
             .Where(x => x.UserId == userId)
             .Select(x => x.Group)
-            .ProjectTo<GroupDto>(mapper.ConfigurationProvider)
-            .ToListAsync();
+            .AsQueryable();
+
+        if (groupParams.GroupName != null)
+        {
+            query = query.Where(x => x.GroupName == groupParams.GroupName);
+        }
+        if (groupParams.Owner != null)
+        {
+            query = query.Where(x => x.Owner.KnownAs == groupParams.Owner);
+        }
+        query = query.Where(x => x.MembersCount >= groupParams.MinMembers 
+            && x.MembersCount <= groupParams.MaxMembers);
+
+        query = groupParams.OrderBy switch
+        {
+            "oldest" => query.OrderBy(x => x.CreatedAt),
+            "newest" => query.OrderByDescending(x => x.CreatedAt),
+            "members" => query.OrderBy(x => x.MembersCount),
+            "membersDesc" => query.OrderByDescending(x => x.MembersCount),
+            _ => query.OrderByDescending(x => x.CreatedAt),
+        };
+
+        return await PagedList<GroupDto>.CreateAsync(
+            query.ProjectTo<GroupDto>(mapper.ConfigurationProvider), 
+            groupParams.PageNumber, groupParams.PageSize);
     }
 
     public void AddUserToGroup(int userId, int groupId)

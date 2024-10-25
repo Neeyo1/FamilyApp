@@ -1,6 +1,7 @@
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
+using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -13,12 +14,14 @@ public class GroupsController(IGroupRepository groupRepository, IUserRepository 
     IAssignmentRepository assignmentRepository, IMapper mapper) : BaseApiController
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GroupDto>>> GetMyGroups()
+    public async Task<ActionResult<IEnumerable<GroupDto>>> GetMyGroups([FromQuery] GroupParams groupParams)
     {
         var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return BadRequest("Could not find user");
 
-        var groups = await groupRepository.GetMyGroupsAsync(user.Id);
+        var groups = await groupRepository.GetMyGroupsAsync(user.Id, groupParams);
+        Response.AddPaginationHeader(groups);
+        
         return Ok(groups);
     }
 
