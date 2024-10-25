@@ -10,7 +10,7 @@ namespace API.Controllers;
 
 [Authorize]
 public class GroupsController(IGroupRepository groupRepository, IUserRepository userRepository, 
-    IMapper mapper) : BaseApiController
+    IAssignmentRepository assignmentRepository, IMapper mapper) : BaseApiController
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<GroupDto>>> GetMyGroups()
@@ -19,12 +19,6 @@ public class GroupsController(IGroupRepository groupRepository, IUserRepository 
         if (user == null) return BadRequest("Could not find user");
 
         var groups = await groupRepository.GetMyGroupsAsync(user.Id);
-
-        foreach (var group in groups)
-        {
-            group.Members = await groupRepository.GetGroupMembersAsync(group.Id);
-        }
-
         return Ok(groups);
     }
 
@@ -40,9 +34,10 @@ public class GroupsController(IGroupRepository groupRepository, IUserRepository 
         if(!await IsUserInGroup(user.Id, groupId))
             return Unauthorized();
 
-        var members = await groupRepository.GetGroupMembersAsync(groupId);
         var result = mapper.Map<GroupDto>(group);
-        result.Members = members;
+        result.Members = await groupRepository.GetGroupMembersAsync(groupId);
+        result.Assignments = await assignmentRepository.GetAssignmentsAsync(groupId);
+
         return Ok(result);
     }
 

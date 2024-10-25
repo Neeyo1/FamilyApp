@@ -23,4 +23,7 @@ public class Assignment
 
     //Assignment - User
     public ICollection<UserAssignment> UserAssignments { get; set; } = [];
+
+    //Assignment - User(Reaction)
+    public ICollection<Reaction> Reactions { get; set; } = [];
 }

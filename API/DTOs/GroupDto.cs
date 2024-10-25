@@ -8,4 +8,5 @@ public class GroupDto
     public MemberDto Owner { get; set; } = null!;
     public int MembersCount { get; set; }
     public IEnumerable<MemberDto> Members { get; set; } = [];
+    public IEnumerable<AssignmentDto> Assignments { get; set; } = [];
 }

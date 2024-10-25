@@ -11,4 +11,5 @@ public class AssignmentDto
     public int MaxUsers { get; set; }
     public MemberDto CreatedBy { get; set; } = null!;
     public IEnumerable<AssignedMemberDto> UsersAssigned { get; set; } = [];
+    public IEnumerable<ReactionDto> Reactions { get; set; } = [];
 }

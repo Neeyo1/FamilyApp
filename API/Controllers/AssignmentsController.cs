@@ -10,10 +10,11 @@ namespace API.Controllers;
 
 [Authorize]
 public class AssignmentsController(IAssignmentRepository assignmentRepository, IMapper mapper,
-    IUserRepository userRepository, IGroupRepository groupRepository) : BaseApiController
+    IUserRepository userRepository, IGroupRepository groupRepository,
+    IReactionRepository reactionRepository) : BaseApiController
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<AssignmentDto>>> GetAssignments([FromQuery ]int groupId)
+    public async Task<ActionResult<IEnumerable<AssignmentDto>>> GetAssignments([FromQuery] int groupId)
     {
         var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return BadRequest("Could not find user");
@@ -25,11 +26,6 @@ public class AssignmentsController(IAssignmentRepository assignmentRepository, I
             return Unauthorized();
 
         var assignments = await assignmentRepository.GetAssignmentsAsync(groupId);
-        foreach (var assignment in assignments)
-        {
-            assignment.UsersAssigned = await assignmentRepository.GetUsersAssignedInAsync(assignment.Id);
-        }
-
         return Ok(assignments);
     }
 
@@ -49,7 +45,8 @@ public class AssignmentsController(IAssignmentRepository assignmentRepository, I
             return Unauthorized();
 
         var result = mapper.Map<AssignmentDto>(assignment);
-        result.UsersAssigned = await assignmentRepository.GetUsersAssignedInAsync(assignment.Id);
+        result.UsersAssigned = await assignmentRepository.GetUsersAssignedInAsync(assignmentId);
+        result.Reactions = await reactionRepository.GetReactionsAsync(assignmentId);
 
         return Ok(result);
     }

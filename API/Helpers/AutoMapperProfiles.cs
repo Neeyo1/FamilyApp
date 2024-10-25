@@ -11,12 +11,17 @@ public class AutoMapperProfiles : Profile
         CreateMap<RegisterDto, AppUser>();
         CreateMap<AppUser, UserDto>();
         CreateMap<AppUser, MemberDto>();
-        CreateMap<Group, GroupDto>();
+        CreateMap<Group, GroupDto>()
+            .ForMember(x => x.Members, y => y.MapFrom(z => z.UserGroups));
         CreateMap<UserGroup, MemberDto>()
             .ForMember(x => x.Id, y => y.MapFrom(z => z.UserId))
             .ForMember(x => x.KnownAs, y => y.MapFrom(z => z.User.KnownAs));
-        CreateMap<Assignment, AssignmentDto>();
+        CreateMap<Assignment, AssignmentDto>()
+            .ForMember(x => x.UsersAssigned, y => y.MapFrom(z => z.UserAssignments));
         CreateMap<UserAssignment, AssignedMemberDto>()
+            .ForMember(x => x.Id, y => y.MapFrom(z => z.UserId))
+            .ForMember(x => x.KnownAs, y => y.MapFrom(z => z.User.KnownAs));
+        CreateMap<Reaction, ReactionDto>()
             .ForMember(x => x.Id, y => y.MapFrom(z => z.UserId))
             .ForMember(x => x.KnownAs, y => y.MapFrom(z => z.User.KnownAs));
 

@@ -22,4 +22,7 @@ public class AppUser : IdentityUser<int>
 
     //User - Assignment(Creator)
     public ICollection<Assignment> AssignmentsCreated { get; set; } = [];
+
+    //User - Assignment(Reaction)
+    public ICollection<Reaction> Reactions { get; set; } = [];
 }
