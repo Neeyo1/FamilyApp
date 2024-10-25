@@ -1,5 +1,6 @@
 using API.DTOs;
 using API.Entities;
+using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -24,12 +25,47 @@ public class AssignmentRepository(DataContext context, IMapper mapper) : IAssign
         return await context.Assignments.FindAsync(assignmentId);
     }
 
-    public async Task<IEnumerable<AssignmentDto>> GetAssignmentsAsync(int groupId)
+    public async Task<PagedList<AssignmentDto>> GetAssignmentsAsync(int groupId,
+        AssignmentParams assignmentParams)
     {
-        return await context.Assignments
+        var query = context.Assignments
             .Where(x => x.GroupId == groupId)
-            .ProjectTo<AssignmentDto>(mapper.ConfigurationProvider)
-            .ToListAsync();
+            .AsQueryable();
+
+        if (assignmentParams.Name != null)
+        {
+            query = query.Where(x => x.Name == assignmentParams.Name);
+        }
+        if (assignmentParams.CreatedBy != null)
+        {
+            query = query.Where(x => x.CreatedBy.KnownAs == assignmentParams.CreatedBy);
+        }
+        query = query.Where(x => x.MaxUsers >= assignmentParams.MinUsers 
+            && x.MaxUsers <= assignmentParams.MaxUsers);
+
+        query = assignmentParams.Status switch
+        {
+            "completed" => query.Where(x => x.Completed == true),
+            "open" => query.Where(x => x.Completed == false),
+            _ => query,
+        };
+
+        query = assignmentParams.OrderBy switch
+        {
+            "oldest" => query.OrderBy(x => x.CreatedAt),
+            "newest" => query.OrderByDescending(x => x.CreatedAt),
+            "endsSoon" => query.Where(x => x.EndsAt > DateTime.UtcNow)
+                               .OrderBy(x => x.EndsAt),
+            "endsSoonDesc" => query.Where(x => x.EndsAt > DateTime.UtcNow)
+                                   .OrderByDescending(x => x.EndsAt),
+            "members" => query.OrderBy(x => x.MaxUsers),
+            "membersDesc" => query.OrderByDescending(x => x.MaxUsers),
+            _ => query.OrderBy(x => x.CreatedAt),
+        };
+
+        return await PagedList<AssignmentDto>.CreateAsync(
+            query.ProjectTo<AssignmentDto>(mapper.ConfigurationProvider), 
+            assignmentParams.PageNumber, assignmentParams.PageSize);
     }
 
     public void AddUserToAssignment(int userId, int assignmentId)

@@ -1,6 +1,7 @@
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
+using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -14,7 +15,8 @@ public class AssignmentsController(IAssignmentRepository assignmentRepository, I
     IReactionRepository reactionRepository) : BaseApiController
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<AssignmentDto>>> GetAssignments([FromQuery] int groupId)
+    public async Task<ActionResult<PagedList<AssignmentDto>>> GetAssignments([FromQuery] int groupId,
+        [FromQuery] AssignmentParams assignmentParams)
     {
         var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return BadRequest("Could not find user");
@@ -25,7 +27,9 @@ public class AssignmentsController(IAssignmentRepository assignmentRepository, I
         if (!await IsUserInGroup(user.Id, groupId))
             return Unauthorized();
 
-        var assignments = await assignmentRepository.GetAssignmentsAsync(groupId);
+        var assignments = await assignmentRepository.GetAssignmentsAsync(groupId, assignmentParams);
+        Response.AddPaginationHeader(assignments);
+
         return Ok(assignments);
     }
 

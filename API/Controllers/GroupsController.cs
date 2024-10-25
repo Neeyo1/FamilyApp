@@ -14,14 +14,14 @@ public class GroupsController(IGroupRepository groupRepository, IUserRepository 
     IAssignmentRepository assignmentRepository, IMapper mapper) : BaseApiController
 {
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GroupDto>>> GetMyGroups([FromQuery] GroupParams groupParams)
+    public async Task<ActionResult<PagedList<GroupDto>>> GetMyGroups([FromQuery] GroupParams groupParams)
     {
         var user = await userRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return BadRequest("Could not find user");
 
         var groups = await groupRepository.GetMyGroupsAsync(user.Id, groupParams);
         Response.AddPaginationHeader(groups);
-        
+
         return Ok(groups);
     }
 
@@ -39,7 +39,6 @@ public class GroupsController(IGroupRepository groupRepository, IUserRepository 
 
         var result = mapper.Map<GroupDto>(group);
         result.Members = await groupRepository.GetGroupMembersAsync(groupId);
-        result.Assignments = await assignmentRepository.GetAssignmentsAsync(groupId);
 
         return Ok(result);
     }
