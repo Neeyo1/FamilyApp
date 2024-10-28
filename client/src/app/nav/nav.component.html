@@ -9,7 +9,11 @@
             <li class="nav-item">
               <a routerLink="/register" routerLinkActive="active" class="nav-link">Register</a>
             </li>
-          }  
+          } @else {
+            <li class="nav-item">
+                <a routerLink="/groups" routerLinkActive="active" class="nav-link">Groups</a>
+              </li>
+          }
         </ul>
 
         @if (accountService.currentUser()) {
