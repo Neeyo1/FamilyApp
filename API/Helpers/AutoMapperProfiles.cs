@@ -21,7 +21,11 @@ public class AutoMapperProfiles : Profile
         CreateMap<UserAssignment, AssignedMemberDto>()
             .ForMember(x => x.Id, y => y.MapFrom(z => z.UserId))
             .ForMember(x => x.KnownAs, y => y.MapFrom(z => z.User.KnownAs));
-        CreateMap<Reaction, ReactionDto>()
+        CreateMap<Reaction, ReactionDto>();
+        CreateMap<IGrouping<string, Reaction>, ReactionDto>()
+            .ForMember(x => x.Name, y => y.MapFrom(z => z.Key))
+            .ForMember(x => x.Users, y => y.MapFrom(z => z.ToList()));
+        CreateMap<Reaction, MemberDto>()
             .ForMember(x => x.Id, y => y.MapFrom(z => z.UserId))
             .ForMember(x => x.KnownAs, y => y.MapFrom(z => z.User.KnownAs));
 

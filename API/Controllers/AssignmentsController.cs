@@ -28,6 +28,10 @@ public class AssignmentsController(IAssignmentRepository assignmentRepository, I
             return Unauthorized();
 
         var assignments = await assignmentRepository.GetAssignmentsAsync(groupId, assignmentParams);
+        foreach (var assignment in assignments)
+        {
+            assignment.Reactions = await reactionRepository.GetReactionsAsync(assignment.Id);
+        }
         Response.AddPaginationHeader(assignments);
 
         return Ok(assignments);

@@ -30,6 +30,7 @@ public class ReactionRepository(DataContext context, IMapper mapper) : IReaction
     {
         return await context.Reactions
             .Where(x => x.AssignmentId == assignmentId)
+            .GroupBy(x => x.Name)
             .ProjectTo<ReactionDto>(mapper.ConfigurationProvider)
             .ToListAsync();
     }
