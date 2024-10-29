@@ -1,1 +1,82 @@
-<p>group-members works!</p>
+@if (group()) {
+    <div class="row">
+        <div class="col-auto me-auto">
+            <form #AddOrRemoveMemberForm="ngForm" (ngSubmit)="addMember()" autocomplete="off">
+                <div class="input-group mb-3">
+                    <input 
+                        type="text"
+                        class="form-control"
+                        name="knownAs"
+                        [(ngModel)]="model.knownAs"
+                        placeholder="User nickname"
+                    >
+                    <button class="btn btn-dark" type="submit">Add member</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-auto ms-auto">
+            <div class="btn-group" role="group">
+                <button 
+                    routerLink="/groups/{{group()?.id}}" 
+                    type="button" 
+                    class="btn btn-dark btn-sm">
+                    Details
+                </button>
+                <button 
+                    routerLink="/groups/{{group()?.id}}/assignments" 
+                    type="button" 
+                    class="btn btn-dark btn-sm">
+                    Assignments
+                </button>
+                <button 
+                    routerLink="/groups/{{group()?.id}}/members" 
+                    type="button" 
+                    class="btn btn-dark btn-sm"
+                    disabled>
+                    Members
+                </button>
+            </div>
+            
+        </div>
+    </div>
+    <div class="row">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col" class="col-5">Member</th>
+                    <th scope="col" class="col-4">Role</th>
+                    <th scope="col" class="col-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (member of members(); track member.id) {
+                <tr class="align-middle">
+                    <td>{{member.knownAs}}</td>
+                    @if (member.id == group()?.owner?.id) {
+                        <td>Owner</td>
+                    } @else {
+                        <td>Member</td>
+                    }
+                    <td>
+                        @if (member.id == group()?.owner?.id) {
+                            <button class="btn btn-warning btn-sm" disabled>
+                                <i class="fa-solid fa-crown fa-sm"></i>
+                            </button>
+                        }
+                        @else {
+                            @if (accountService.currentUser()?.id == group()?.owner?.id){
+                                <button class="btn btn-danger btn-sm me-1" 
+                                        (click)="removeMember(member.knownAs)"
+                                        tooltip="Remove member"
+                                >
+                                    <i class="fa-solid fa-trash fa-sm"></i>
+                                </button>
+                            }
+                        }
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

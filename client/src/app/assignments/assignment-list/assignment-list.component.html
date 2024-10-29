@@ -1,0 +1,153 @@
+@if (group()) {
+    <div class="row">
+        <div class="col-auto ms-auto">
+            <div class="btn-group" role="group">
+                <button 
+                    routerLink="/groups/{{group()?.id}}" 
+                    type="button" 
+                    class="btn btn-dark btn-sm">
+                    Details
+                </button>
+                <button 
+                    routerLink="/groups/{{group()?.id}}/assignments" 
+                    type="button" 
+                    class="btn btn-dark btn-sm"
+                    disabled
+                >
+                    Assignments
+                </button>
+                <button 
+                    routerLink="/groups/{{group()?.id}}/members" 
+                    type="button" 
+                    class="btn btn-dark btn-sm">
+                    Members
+                </button>
+            </div>
+            
+        </div>
+    </div>
+    
+    <div class="container mt-3">
+        <form #form="ngForm" (ngSubmit)="loadAssignments(group()!.id)" class="d-flex flex-wrap mb-3">
+              <div class="d-flex col-3">
+                  <label class="col-form-label">Users from:</label>
+                  <input type="number" 
+                      class="form-control ms-1" 
+                      style="width: 70px;"
+                      name="minUsers"
+                      [(ngModel)]="assignmentService.assignmentParams().minUsers"
+                  >
+              </div>
+      
+              <div class="d-flex col-3">
+                  <label class="col-form-label">Name</label>
+                  <input type="text" 
+                      class="form-control ms-1" 
+                      style="width: 150px;"
+                      name="name"
+                      [(ngModel)]="assignmentService.assignmentParams().name"
+                  >
+              </div>
+      
+              <div class="d-flex col-4">
+                  <label class="col-form-label">Created by</label>
+                  <input type="text" 
+                      class="form-control ms-1" 
+                      style="width: 150px;"
+                      name="createdBy"
+                      [(ngModel)]="assignmentService.assignmentParams().createdBy"
+                  >
+              </div>
+      
+              <div class="f-flex col-12" style="height: 10px;"></div>
+      
+              <div class="d-flex col-3">
+                  <label class="col-form-label">Users to:</label>
+                  <input type="number" 
+                      class="form-control ms-1" 
+                      style="width: 70px;"
+                      name="maxUsers"
+                      [(ngModel)]="assignmentService.assignmentParams().maxUsers"
+                  >
+              </div>
+
+              <div class="d-flex col-3">
+                <label class="col-form-label">Status:</label>
+                <select name="status"
+                    class="form-select ms-1" 
+                    style="width:150px"
+                    [(ngModel)]="assignmentService.assignmentParams().status"
+                >
+                @for (status of statusList; track status.value) {
+                    <option [value]="status.value">{{status.display}}</option>
+                }
+                </select>
+            </div>
+      
+              <div class="d-flex col-3">
+                  <label class="col-form-label">Order by:</label>
+                  <select name="orderBy"
+                      class="form-select ms-1" 
+                      style="width:150px"
+                      [(ngModel)]="assignmentService.assignmentParams().orderBy"
+                  >
+                  @for (orderBy of orderByList; track orderBy.value) {
+                      <option [value]="orderBy.value">{{orderBy.display}}</option>
+                  }
+                  </select>
+              </div>
+    
+              <div class="d-flex col-1">
+                <button class="btn btn-dark" style="width: 100px;" type="submit">Filter</button>
+              </div>
+    
+              <div class="d-flex ms-2 col-1">
+                <button (click)="resetFilters()" class="btn btn-dark" style="width: 100px;" type="button">Reset</button>
+              </div>
+        </form>
+      </div>
+      
+      <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col" class="col-2">Name</th>
+              <th scope="col" class="col-4">Description</th>
+              <th scope="col" class="col-2">Created by</th>
+              <th scope="col" class="col-1">Created at</th>
+              <th scope="col" class="col-1">Ends at</th>
+              <th scope="col" class="col-1">Completed</th>
+              <th scope="col" class="col-1">Capacity</th>
+            </tr>
+          </thead>
+          <tbody>
+              @for (assignment of assignmentService.paginatedResult()?.items; track assignment.id) {
+                  <tr routerLink="/assignment/{{assignment.id}}">
+                      <td>{{assignment.name}}</td>
+                      <td>{{assignment.description}}</td>
+                      <td>{{assignment.createdBy.knownAs}}</td>
+                      <td>{{assignment.createdAt.toString().substring(0,10)}}</td>
+                      <td>{{assignment.endsAt.toString().substring(0,10)}}</td>
+                      <td>{{assignment.completed}}</td>
+                      <td>{{assignment.usersAssigned.length}}/{{assignment.maxUsers}}</td>
+                  </tr>
+              }
+          </tbody>
+        </table>
+      
+      @if (assignmentService.paginatedResult()?.pagination) {
+          <div class="d-flex justify-content-center">
+              <pagination [boundaryLinks]="true" 
+                          [totalItems]="assignmentService.paginatedResult()?.pagination!.totalItems"
+                          [itemsPerPage]="assignmentService.paginatedResult()?.pagination!.itemsPerPage"
+                          (pageChanged)="pageChanged($event)"
+                          [(ngModel)]="assignmentService.paginatedResult()?.pagination!.currentPage"
+                          [maxSize]="10"
+                          previousText="&lsaquo;" 
+                          nextText="&rsaquo;" 
+                          firstText="&laquo;" 
+                          lastText="&raquo;"
+                          class="my-pagination">
+              </pagination>   
+          </div>
+      }
+}

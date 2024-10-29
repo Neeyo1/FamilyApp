@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { GroupService } from '../../_services/group.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
@@ -17,7 +17,7 @@ export class GroupDetailComponent implements OnInit{
   private route = inject(ActivatedRoute);
   private toastrServie = inject(ToastrService);
   private router = inject(Router);
-  group?: Group;
+  group = signal<Group | null>(null);
   accountService = inject(AccountService);
 
   ngOnInit(): void {
@@ -29,7 +29,7 @@ export class GroupDetailComponent implements OnInit{
     if (!groupId) return;
 
     this.groupService.getGroup(groupId).subscribe({
-      next: group => this.group = group
+      next: group => this.group.set(group)
     })
   }
 
